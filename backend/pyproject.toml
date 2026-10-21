@@ -1,6 +1,6 @@
 [project]
 name = "driving-exam-assistant"
-version = "1.0.0"
+version = "0.1.0"
 description = "驾考宝典智能查询助手后端：试卷生成与 MD 下载、驾考知识问答、自定义题库自动阅卷"
 requires-python = ">=3.13"
 dependencies = [

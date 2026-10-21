@@ -46,7 +46,7 @@ window.DKA.config = {
   CHAT_STORAGE_KEY: 'dka.chat.history.v1',
   CHAT_MAX_STORED: 40,
   CHAT_HISTORY_SEND: 10,
-  APP_VERSION: '1.0.0'
+  APP_VERSION: '0.1.0'
 };
 ```
 

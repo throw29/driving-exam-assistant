@@ -1,6 +1,6 @@
 # 驾考宝典智能查询助手 · 接口文档
 
-> 版本：v1.0.0　｜　接口前缀：`/api/v1`　｜　协议：HTTP / JSON　｜　字符集：UTF-8
+> 版本：v0.1.0　｜　接口前缀：`/api/v1`　｜　协议：HTTP / JSON　｜　字符集：UTF-8
 
 ## 1. 基础信息
 
@@ -159,7 +159,7 @@ Authorization: Bearer sk-dtk-local-2026-change-me
   "data": {
     "status": "ok",
     "name": "驾考宝典智能查询助手",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "time": "2026-10-21 11:52:00",
     "timezone": "Asia/Shanghai",
     "auth": "verified",
@@ -506,7 +506,7 @@ curl -L "http://127.0.0.1:8000/api/v1/exams/exam_xxx/download?include_answers=fa
   "code": 0,
   "msg": "获取成功",
   "data": {
-    "version": "1.0.0",
+    "version": "0.1.0",
     "categories": [
       { "key": "signals", "name": "交通信号与标志" },
       { "key": "rules", "name": "通行规则与让行" }

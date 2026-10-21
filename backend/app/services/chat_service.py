@@ -120,7 +120,7 @@ def load_knowledge_base() -> dict[str, Any]:
                 raise RuntimeError(f"{entry['id']} 关联了不存在的知识点：{related_id}")
 
     return {
-        "version": raw.get("version", "1.0.0"),
+        "version": raw.get("version", "0.1.0"),
         "categories": raw.get("categories", []),
         "hot_questions": raw.get("hot_questions", []),
         "entries": list(by_id.values()),

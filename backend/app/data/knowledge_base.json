@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "0.1.0",
   "categories": [
     {"key": "signals", "name": "交通信号与标志"},
     {"key": "rules", "name": "通行规则与让行"},

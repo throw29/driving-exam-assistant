@@ -56,7 +56,7 @@ class Settings:
     """应用设置（不可变，进程启动时一次性读取）。"""
 
     app_name: str = "驾考宝典智能查询助手"
-    app_version: str = "1.0.0"
+    app_version: str = "0.1.0"
     description: str = (
         "驾校内部业务工具：一键生成驾考模拟试卷并下载 Markdown、"
         "对话式查询驾考知识点、上传自定义题库并自动阅卷。"

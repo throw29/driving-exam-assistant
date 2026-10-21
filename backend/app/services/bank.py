@@ -78,7 +78,7 @@ def load_bank() -> dict[str, Any]:
             ]
             questions.append(enriched)
 
-    return {"version": subject_doc.get("version", "1.0.0"), "subjects": subjects, "questions": questions}
+    return {"version": subject_doc.get("version", "0.1.0"), "subjects": subjects, "questions": questions}
 
 
 def get_subject(subject_key: str) -> dict[str, Any]:
