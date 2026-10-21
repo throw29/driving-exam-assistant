@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="驾考宝典智能查询助手：一键生成驾考模拟试卷并下载 Markdown、对话式查询驾考知识点、上传自定义题库自动阅卷评分。">
+  <title>驾考宝典智能查询助手 · 驾校内部工具</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#exam" data-tab-link="exam" aria-label="返回试卷生成">
+        <span class="brand-mark">驾</span>
+        <span class="brand-text">
+          <strong>驾考宝典智能查询助手</strong>
+          <small>驾校内部工具 · 组卷 / 问答 / 阅卷</small>
+        </span>
+      </a>
+
+      <nav class="tabs" role="tablist" aria-label="核心功能导航">
+        <button class="tab is-active" type="button" role="tab" data-tab="exam" id="tab-exam"
+                aria-selected="true" aria-controls="panel-exam">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h7.5L19 8v12.5H7z"/><path d="M14 3.5V8h5M10 12h6M10 16h6"/></svg>
+          <span>试卷生成</span>
+        </button>
+        <button class="tab" type="button" role="tab" data-tab="chat" id="tab-chat"
+                aria-selected="false" aria-controls="panel-chat" tabindex="-1">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 13h5"/></svg>
+          <span>智能问答</span>
+        </button>
+        <button class="tab" type="button" role="tab" data-tab="grading" id="tab-grading"
+                aria-selected="false" aria-controls="panel-grading" tabindex="-1">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16.5V4.5M7.5 9 12 4.5 16.5 9"/><path d="M4.5 14v5.5h15V14"/></svg>
+          <span>上传阅卷</span>
+        </button>
+      </nav>
+
+      <button class="status-pill is-checking" type="button" id="serverStatus" title="点击重新检测后端连接">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="serverStatusText">连接检测中</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- ==================== 功能一：试卷生成 ==================== -->
+    <section class="panel is-active" id="panel-exam" role="tabpanel" aria-labelledby="tab-exam">
+      <div class="page-head">
+        <div class="page-head-copy">
+          <p class="eyebrow">功能一 · 智能组卷</p>
+          <h1>一键生成驾考模拟试卷</h1>
+          <p class="lead">按科目、题量、题型与章节自由组合，在线预览完整题干、选项、标准答案与解析，并一键导出规范 Markdown 文件。</p>
+        </div>
+        <div class="head-stats" aria-label="题库统计">
+          <div><strong id="bankTotal">—</strong><span>内置试题</span></div>
+          <div><strong id="kbTotal">—</strong><span>知识要点</span></div>
+          <div><strong>90</strong><span>合格分数线</span></div>
+        </div>
+      </div>
+
+      <div class="exam-layout">
+        <aside class="card config-card">
+          <div class="card-head">
+            <h2>组卷参数</h2>
+            <span class="hint">按需筛选，精准组卷</span>
+          </div>
+
+          <form id="examForm" novalidate>
+            <fieldset class="field">
+              <legend>考试科目</legend>
+              <div class="subject-grid" id="subjectOptions">
+                <p class="loading-text">正在加载题库信息…</p>
+              </div>
+            </fieldset>
+
+            <div class="field">
+              <label for="questionCount">题目数量 <span class="required">*</span></label>
+              <div class="count-row">
+                <input id="questionCount" name="questionCount" type="number" min="1" max="200"
+                       value="20" inputmode="numeric" autocomplete="off">
+                <span class="unit">题</span>
+              </div>
+              <div class="quick-counts" id="quickCounts"></div>
+              <p class="field-hint" id="countHint">满分 100 分，90 分及格</p>
+            </div>
+
+            <fieldset class="field">
+              <legend>题型</legend>
+              <div class="check-grid" id="typeOptions">
+                <p class="loading-text">正在加载题型…</p>
+              </div>
+              <p class="field-hint">科目一仅含单选题与判断题；科目四支持多选题。</p>
+            </fieldset>
+
+            <fieldset class="field">
+              <legend>
+                章节知识点
+                <span class="legend-actions">
+                  <button type="button" class="link-btn" id="selectAllChapters">全选</button>
+                  <button type="button" class="link-btn" id="clearChapters">清空</button>
+                </span>
+              </legend>
+              <div class="chapter-list" id="chapterOptions">
+                <p class="loading-text">正在加载章节…</p>
+              </div>
+            </fieldset>
+
+            <label class="switch-row">
+              <input type="checkbox" id="shuffleQuestions" checked>
+              <span>随机打乱题目顺序</span>
+            </label>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block" id="generateBtn">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v17M3.5 12h17"/><path d="m5 8 3-3M19 8l-3-3M5 16l3 3M19 16l-3 3"/></svg>
+              一键生成试卷
+            </button>
+            <p class="form-error" id="examError" role="alert" hidden></p>
+          </form>
+        </aside>
+
+        <section class="card preview-card" id="examPreview" aria-live="polite">
+          <div class="empty-state" id="examEmpty">
+            <div class="empty-icon">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 5h17l9 9v29H12z"/><path d="M29 5v9h9M18 23h14M18 30h14M18 37h9"/></svg>
+            </div>
+            <h2>试卷预览区</h2>
+            <p>选择左侧参数后点击「一键生成试卷」，这里会展示完整试卷、标准答案与解析。</p>
+            <ul class="empty-points">
+              <li>规范的 Markdown 排版</li>
+              <li>题干 / 选项 / 答案解析分区</li>
+              <li>支持含答案卷与空白卷下载</li>
+            </ul>
+          </div>
+
+          <div class="loading-state" id="examLoading" hidden>
+            <span class="spinner" aria-hidden="true"></span>
+            <p>正在从题库中抽题组卷…</p>
+          </div>
+
+          <div id="examResult" hidden>
+            <div class="exam-toolbar">
+              <div class="exam-title-block">
+                <span class="badge" id="examSubjectBadge">科目一</span>
+                <h2 id="examTitle">驾考模拟试卷</h2>
+                <div class="meta-chips" id="examMeta"></div>
+              </div>
+              <div class="toolbar-actions">
+                <button class="btn btn-primary" type="button" id="downloadExamBtn">下载 MD 试卷</button>
+                <button class="btn btn-ghost" type="button" id="downloadBlankBtn">空白卷</button>
+                <button class="btn btn-ghost" type="button" id="toggleMarkdownBtn">查看 MD 源码</button>
+              </div>
+            </div>
+
+            <div class="exam-rules" id="examRules"></div>
+            <div class="exam-questions" id="examQuestions"></div>
+            <div class="answer-key" id="examAnswerKey"></div>
+
+            <div class="markdown-source" id="markdownSource" hidden>
+              <div class="source-head">
+                <strong>Markdown 源码</strong>
+                <div>
+                  <button class="btn btn-small btn-ghost" type="button" id="copyMarkdownBtn">复制源码</button>
+                  <button class="btn btn-small btn-ghost" type="button" id="closeMarkdownBtn">收起</button>
+                </div>
+              </div>
+              <pre id="markdownCode"></pre>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ==================== 功能二：智能问答 ==================== -->
+    <section class="panel" id="panel-chat" role="tabpanel" aria-labelledby="tab-chat" aria-hidden="true">
+      <div class="page-head compact">
+        <div class="page-head-copy">
+          <p class="eyebrow">功能二 · 智能问答</p>
+          <h1>对话式驾考知识点查询</h1>
+          <p class="lead">覆盖交规、标志、扣分处罚、操作技巧与答题技巧，支持多轮追问；聊天记录保存在本机，刷新页面自动恢复。</p>
+        </div>
+        <div class="head-stats" aria-label="知识库统计">
+          <div><strong id="chatKbTotal">—</strong><span>知识要点</span></div>
+          <div><strong>8</strong><span>知识分类</span></div>
+        </div>
+      </div>
+
+      <div class="chat-shell card">
+        <aside class="chat-side">
+          <div class="side-block">
+            <h3>试试这样问</h3>
+            <div class="hot-list" id="hotQuestions">
+              <p class="loading-text">正在加载热门问题…</p>
+            </div>
+          </div>
+          <div class="side-block">
+            <h3>知识分类</h3>
+            <div class="category-list" id="chatCategories">
+              <p class="loading-text">正在加载分类…</p>
+            </div>
+          </div>
+          <div class="side-note">
+            <strong>回答范围</strong>
+            <p>仅解答驾考相关问题；知识库未覆盖时会给出提示，不输出无关内容。</p>
+          </div>
+        </aside>
+
+        <div class="chat-main">
+          <div class="chat-head">
+            <div class="assistant-id">
+              <span class="avatar">AI</span>
+              <div>
+                <strong>驾考知识助手</strong>
+                <span class="online"><i></i>知识库在线</span>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-small" type="button" id="clearChatBtn">清空历史</button>
+          </div>
+
+          <div class="chat-messages" id="chatMessages" role="log" aria-live="polite" aria-label="对话记录"></div>
+
+          <form class="chat-composer" id="chatForm">
+            <textarea id="chatInput" rows="1" maxlength="1000"
+                      placeholder="输入驾考问题，Enter 发送，Shift + Enter 换行…"
+                      aria-label="输入驾考问题"></textarea>
+            <div class="composer-foot">
+              <span class="composer-hint">仅支持驾考知识问答 · 历史记录保存在本机浏览器</span>
+              <button type="submit" class="btn btn-primary" id="sendChatBtn">发送</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 功能三：上传阅卷 ==================== -->
+    <section class="panel" id="panel-grading" role="tabpanel" aria-labelledby="tab-grading" aria-hidden="true">
+      <div class="page-head compact">
+        <div class="page-head-copy">
+          <p class="eyebrow">功能三 · 上传阅卷</p>
+          <h1>自定义题库 · 在线作答 · 自动评分</h1>
+          <p class="lead">上传 txt / md 题库，系统自动拆分题干、选项与标准答案；在线作答后即时计算总分、正确率并汇总错题。</p>
+        </div>
+        <div class="head-stats" aria-label="评分规则">
+          <div><strong>100</strong><span>试卷满分</span></div>
+          <div><strong>90</strong><span>合格线</span></div>
+        </div>
+      </div>
+
+      <div class="upload-layout" id="gradingUploadView">
+        <div class="card upload-card">
+          <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="选择或拖拽题库文件">
+            <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain,text/markdown" hidden>
+            <div class="drop-icon">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 33V10M15 19l9-9 9 9"/><path d="M8 29v10h32V29"/></svg>
+            </div>
+            <h2>拖拽题库文件到这里</h2>
+            <p>或点击选择文件，支持 <strong>.txt / .md</strong>，最大 2 MB</p>
+            <span class="btn btn-primary">选择文件</span>
+            <p class="pending-file" id="pendingFile" hidden></p>
+          </div>
+          <div class="upload-actions">
+            <button class="btn btn-primary" type="button" id="uploadBtn" disabled>上传并解析</button>
+            <button class="btn btn-ghost" type="button" id="resetUploadBtn" disabled>重新选择</button>
+          </div>
+          <p class="form-error" id="uploadError" role="alert" hidden></p>
+          <div class="upload-progress" id="uploadProgress" hidden>
+            <span></span>
+            <p>正在解析题库，请稍候…</p>
+          </div>
+        </div>
+
+        <div class="card format-card">
+          <div class="card-head">
+            <h2>题库格式说明</h2>
+            <a class="link-btn" href="samples/sample_bank.md" download>下载示例题库</a>
+          </div>
+          <p class="field-hint">题号、题干、选项、标准答案必填，解析建议填写；支持中英文标点与多种题型标记。</p>
+          <pre class="format-code">1. 【单选】机动车遇红灯时应当？
+A. 停车等待
+B. 加速通过
+C. 减速通过
+D. 鸣笛通过
+答案：A
+解析：红灯亮时应在停止线外停车等待。
+
+2. 【判断】黄灯亮时，已越过停止线的车辆可以继续通行。
+答案：正确</pre>
+          <ul class="format-tips">
+            <li>题号支持 <code>1.</code> / <code>1、</code> / <code>第1题</code> / <code>（1）</code>；</li>
+            <li>题型支持 <code>【单选】</code> <code>【多选】</code> <code>【判断】</code>，也可省略由系统推断；</li>
+            <li>多选题答案写 <code>答案：ABC</code> 或 <code>答案：A、B、C</code>；</li>
+            <li>判断题可省略选项，系统自动补全“正确 / 错误”。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="paper-layout" id="gradingPaperView" hidden>
+        <div class="card paper-main">
+          <div class="paper-head">
+            <div>
+              <p class="eyebrow">在线作答</p>
+              <h2 id="paperTitle">自定义题库</h2>
+              <div class="meta-chips" id="paperMeta"></div>
+            </div>
+            <button class="btn btn-ghost btn-small" type="button" id="newPaperBtn">重新上传</button>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-head">
+              <span>作答进度</span>
+              <strong id="answerProgressText">0 / 0</strong>
+            </div>
+            <div class="progress"><span id="answerProgressBar"></span></div>
+          </div>
+
+          <div id="paperQuestions" class="paper-questions"></div>
+        </div>
+
+        <aside class="card submit-card">
+          <h3>提交前检查</h3>
+          <div class="side-stats">
+            <div><span>题目总数</span><strong id="paperTotalCount">0</strong></div>
+            <div><span>已作答</span><strong id="paperAnsweredCount">0</strong></div>
+            <div><span>未作答</span><strong id="paperUnansweredCount">0</strong></div>
+          </div>
+          <p class="field-hint">满分 100 分，90 分及格；提交后将立即评分并展示错题解析。</p>
+          <button class="btn btn-primary btn-block" type="button" id="submitPaperBtn">提交阅卷</button>
+          <button class="btn btn-ghost btn-block" type="button" id="clearAnswersBtn">清空作答</button>
+
+          <div class="parse-report" id="parseReport" hidden>
+            <button class="collapse-btn" type="button" id="toggleReportBtn">
+              解析提示 <span id="reportCount"></span>
+            </button>
+            <div id="parseReportBody" hidden></div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="result-layout" id="gradingResultView" hidden>
+        <div class="card score-card">
+          <p class="eyebrow">本次得分</p>
+          <div class="score-ring" id="scoreRing">
+            <div class="score-ring-inner">
+              <strong id="resultScore">0</strong>
+              <span>/ 100</span>
+            </div>
+          </div>
+          <span class="grade-badge" id="resultGradeBadge">待评定</span>
+          <p class="result-summary" id="resultSummary"></p>
+          <div class="result-actions">
+            <button class="btn btn-primary btn-block" type="button" id="downloadWrongBtn">下载错题 MD</button>
+            <button class="btn btn-ghost btn-block" type="button" id="retryPaperBtn">重新作答</button>
+            <button class="btn btn-ghost btn-block" type="button" id="newUploadBtn">上传新题库</button>
+          </div>
+        </div>
+
+        <div class="result-stats">
+          <div class="stat-card"><span>正确率</span><strong id="resultAccuracy">—</strong></div>
+          <div class="stat-card is-correct"><span>答对</span><strong id="resultCorrect">—</strong></div>
+          <div class="stat-card is-wrong"><span>答错</span><strong id="resultWrong">—</strong></div>
+          <div class="stat-card"><span>作答用时</span><strong id="resultDuration">—</strong></div>
+        </div>
+
+        <div class="card wrong-card">
+          <div class="card-head">
+            <h2>错题汇总 <span class="count-badge" id="wrongCountBadge">0</span></h2>
+            <span class="hint">已标注正确答案并附解析</span>
+          </div>
+          <div id="wrongList"></div>
+        </div>
+
+        <div class="card all-card">
+          <button class="collapse-btn" type="button" id="toggleAllDetails" aria-expanded="false">
+            查看全部题目详情
+          </button>
+          <div id="allDetails" hidden></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>驾考宝典智能查询助手 v1.0.0</span>
+    <span>驾校内部业务工具 · 仅供教学练习使用</span>
+    <span>法规与处罚以当地交管部门最新规定为准</span>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/exam.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/grading.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

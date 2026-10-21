@@ -1,0 +1,18 @@
+# Keep the repository cross-platform and executable scripts usable.
+# - Code, docs and JSON: LF
+# - Windows launch scripts: CRLF
+# - Shell scripts: LF
+# - Screenshots: binary
+* text=auto eol=lf
+
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+*.sh text eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary

@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0",
+  "subjects": {
+    "subject1": {
+      "name": "科目一",
+      "full_name": "科目一 · 道路交通安全法律、法规和相关知识",
+      "short_name": "科目一",
+      "description": "道路交通安全法律、法规和规章，交通信号、标志、标线，安全行车与文明驾驶常识。",
+      "duration_minutes": 45,
+      "exam_question_count": 100,
+      "pass_score": 90,
+      "supported_types": ["single", "judge"],
+      "chapters": [
+        "交通法规与信号",
+        "交通标志与标线",
+        "安全行车与文明驾驶",
+        "机动车驾驶操作基础",
+        "违法处罚与记分"
+      ]
+    },
+    "subject4": {
+      "name": "科目四",
+      "full_name": "科目四 · 安全文明驾驶常识",
+      "short_name": "科目四",
+      "description": "安全文明驾驶操作要求、恶劣气象和复杂道路条件下的安全驾驶知识、紧急情况处置及文明驾驶常识。",
+      "duration_minutes": 30,
+      "exam_question_count": 50,
+      "pass_score": 90,
+      "supported_types": ["single", "judge", "multiple"],
+      "chapters": [
+        "安全文明驾驶常识",
+        "恶劣天气与复杂路况",
+        "紧急情况处置",
+        "文明驾驶与职业道德"
+      ]
+    }
+  }
+}
